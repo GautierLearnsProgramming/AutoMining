@@ -503,7 +503,7 @@ namespace IngameScript
             double distance = distanceVec.Length();
             if (distance < 50)
             {
-                return Math.Log(distance + 1) * Math.Sqrt(maxBackwardAcceleration) * 0.5;
+                return Math.Log(distance + 1) * Math.Sqrt(maxBackwardAcceleration) * 0.8;
             }
 
             return MathHelper.Clamp(Math.Sqrt(2 * maxBackwardAcceleration * distance) * 0.6, 0, 100);
