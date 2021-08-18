@@ -96,7 +96,6 @@ If you have a problem and need to stop the script, just run the PB with __forceS
 
 <h3> The Information Script </h3>
 
-In order to help you get all the numbers (GPS position/ orientatio![runPBstartSE]
-n) needed to make the script work, I have created an information script. Copy-paste it into a PB, and run it with the following arguments :
+In order to help you get all the numbers (GPS position/ orientation) needed to make the script work, I have created an information script. Copy-paste it into a PB, and run it with the following arguments :
 * AddMoveStep will write your current GPS positon/orientation to the custom data of the PB which has the information script.
 * AddMineStep will do the same, but add a semi-colon and clearly mark the spot where you have to enter the desired mine depth at the end of the line.
