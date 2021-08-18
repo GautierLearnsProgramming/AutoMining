@@ -82,9 +82,9 @@ Here, you define the flight plan for your ship, so the ship will execute the cor
 <h4> Recap </h4>
 
 So, to recap, a typical ship trip will look like that :
-l. undock from your base using the instructions in [baseUndock]
-l. execute the instructions in the required path
-l. dock to your base using the instructions in [baseDock]
+* undock from your base using the instructions in [baseUndock]
+* execute the instructions in the required path
+* dock to your base using the instructions in [baseDock]
 
 <h3> Execution </h3>
 
