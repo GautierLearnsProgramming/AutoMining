@@ -28,18 +28,57 @@ namespace IngameScript
         List<IMyShipController> _controllers = new List<IMyShipController>();
         List<IMyShipConnector> _connectors = new List<IMyShipConnector>();
         List<PathStep> _steps = new List<PathStep>();
+        List<PathStep> _baseDock = new List<PathStep>();
+        List<PathStep> _baseUndock = new List<PathStep>();
+        List<string> _flightPlan = new List<string>();
+        Dictionary<string, List<PathStep>> _paths = new Dictionary<string, List<PathStep>>();
         IMyShipController _controller;
 
+        //Used to regulate main behaviour
+        int _flightPlanControl = 0;
 
+        // Used to regulate behavior in flyStepPath
+        int _flyPathPartControl = 0;
         int _stepControl = 0;
-
+        // Used to regulate behavior in flyToCoordinate
         int _flightControl = 0;
+        // Used to regulate behavior in makeParkStep
         int _unparkControl = 0;
+        // Used to regulate behavior in makeUnparkStep
         int _parkControl = 0;
+        // Used to regulate behavior in mineTunnel
         int _mineControl = 0;
+        // Used to regulate sleep behaviour
+        int _sleepControl = 0;
 
         MyCommandLine _commandLine = new MyCommandLine();
         MyIni _ini = new MyIni();
+
+        public void Main(string argument, UpdateType updateSource)
+        {
+            if (_commandLine.TryParse(argument))
+            {
+                if (argument.Equals("start"))
+                {
+                    _flightPlanControl = 0;
+                    Runtime.UpdateFrequency = UpdateFrequency.Update1;
+                }
+                else if (argument.Equals("forceStop"))
+                {
+                    resetOverrides();
+                    Runtime.UpdateFrequency = UpdateFrequency.None;
+                }
+            } else
+            {
+                if (_sleepControl > 0)
+                {
+                    _sleepControl--;
+                }
+                else { 
+                   flyFlightPlan();
+                }
+            }
+        }
 
         public Program()
         {
@@ -54,11 +93,56 @@ namespace IngameScript
             GridTerminalSystem.GetBlocksOfType(_connectors, x => x.IsSameConstructAs(Me));
             _controller = _controllers[0];
 
-            Runtime.UpdateFrequency = UpdateFrequency.Update1;
+            loadPaths();
+            loadFligthPlan();
+            loadBase();
 
-            List<MyIniKey> path1keys = new List<MyIniKey>();
-            _ini.GetKeys("path", path1keys);
-            foreach (var key in path1keys)
+            Runtime.UpdateFrequency = UpdateFrequency.None;
+        }
+
+        public void loadFligthPlan()
+        {
+            List<MyIniKey> flightPlanKeys = new List<MyIniKey>();
+            _ini.GetKeys("flightPlan", flightPlanKeys);
+
+            foreach(var key in flightPlanKeys)
+            {
+                _flightPlan.Add(key.Name);
+            }
+        }
+
+        public void loadBase()
+        {
+            List<MyIniKey> baseDockKeys = new List<MyIniKey>();
+            List<MyIniKey> baseUndockKeys = new List<MyIniKey>();
+            _ini.GetKeys("baseDock", baseDockKeys);
+            _ini.GetKeys("baseUndock", baseUndockKeys);
+            loadSteps(baseDockKeys, _baseDock);
+            loadSteps(baseUndockKeys, _baseUndock);
+        }
+
+        public void loadPaths()
+        {
+            List<string> sections = new List<string>();
+            _ini.GetSections(sections);
+
+            foreach(var section in sections)
+            {
+                if (!section.Contains("path")) continue;
+
+                List<MyIniKey> pathKeys = new List<MyIniKey>();
+                List<PathStep> _steps = new List<PathStep>();
+                _ini.GetKeys(section, pathKeys);
+
+                loadSteps(pathKeys, _steps);
+
+                _paths[section] = _steps;
+            }
+        }
+
+        public void loadSteps(List<MyIniKey> pathKeys, List<PathStep> _steps)
+        {
+            foreach (var key in pathKeys)
             {
                 if (key.Name.Contains("move"))
                 {
@@ -88,37 +172,9 @@ namespace IngameScript
         {
         }
 
-        public void Main(string argument, UpdateType updateSource)
+        public void Sleep(int sleepCount)
         {
-            
-            
-            
-            //MatrixD startPos = new MatrixD(nullMatrix);
-            //startPos.Translation = new Vector3D(908822.28, -9627.49, 1590485.59);
-            //startPos.Forward = new Vector3D(0, 0, 1);
-            //startPos.Up = new Vector3D(0, 1, 0);
-            //mineTunnel(startPos, 150);
-
-            flyStepPath(_steps);
-
-            //flyToCoordinate(new MatrixD(-0.872052431106567, -0.403872519731522, -0.27642548084259, 0, 0.487992972135544, -0.760527789592743, -0.42832225561142, 0, -0.0372417196631432, -0.508413255214691, 0.860307455062866, 0, 908658.584301433, -9764.90295774968, 1590674.94891754, 1));
-
-            //orientShip(new Vector3D(-0.0372417196631432, -0.508413255214691, 0.860307455062866), new Vector3D(0.487992972135544, -0.760527789592743, -0.42832225561142), _controller);
-            //                        (0.872053146362305, 0.403874188661575, 0.276421844959259, 0, 0.487992495298386, -0.760528206825256, -0.428321957588196, 0, 0.0372384786605835, 0.508411288261414, -0.860308527946472, 0, 908658.478502589, -9764.2468889776, 1590674.33268479, 1)
-            //flyToCoordinate(_coordinates[1]);
-
-            //GPS:Mythologiga #1:912123.29:-9627.34:1595693.03:#FF75C9F1:
-            //move(new Vector3D(912123.29, -9627.34, 1595693.03));
-
-            //GPS:Mythologiga #2:912513.87:-10192.73:1594600.02:#FF75C9F1:
-            //move(new Vector3D(912513.87, -10192.73, 1594600.02));
-
-            //GPS:Mythologiga #3:912123.29:-9627.34:1595693.03:#FF75C9F1:
-            //move(new Vector3D(912123.29, -9607.34, 1595693.03));
-
-            //orientShip(new Vector3D(1, 0, 0), new Vector3D(0, 1, 0), _controller);
-            //orientShip(new Vector3D(0, 1, 0), new Vector3D(0, 0, 1), _controller);
-            
+            _sleepControl = sleepCount;
         }
 
         public MatrixD parseCoord(string coordString)
@@ -127,24 +183,68 @@ namespace IngameScript
             return new MatrixD(Double.Parse(values[0]), Double.Parse(values[1]), Double.Parse(values[2]), Double.Parse(values[3]), Double.Parse(values[4]), Double.Parse(values[5]), Double.Parse(values[6]), Double.Parse(values[7]), Double.Parse(values[8]), Double.Parse(values[9]), Double.Parse(values[10]), Double.Parse(values[11]), Double.Parse(values[12]), Double.Parse(values[13]), Double.Parse(values[14]), Double.Parse(values[15]));
         }
 
+        public bool flyFlightPlan()
+        {
+            if (_flightPlanControl == _flightPlan.Count)
+            {
+                Echo("Flight Plan Finished");
+                Runtime.UpdateFrequency = UpdateFrequency.None;
+                return true;
+            }
+            else
+            {
+                if (flyTotalPath(_paths[_flightPlan[_flightPlanControl]])) _flightPlanControl++;
+            }
+            return false;
+        }
+
+        public void resetOverrides()
+        {
+            foreach (var gyro in _gyros)
+            {
+                gyro.GyroOverride = false;
+            }
+            foreach (var thruster in _thrusters)
+            {
+                thruster.ThrustOverridePercentage = 0f;
+            }
+        }
+
+        public bool flyTotalPath(List<PathStep> steps)
+        {
+            switch (_flyPathPartControl)
+            {
+                case 0:
+                    if (flyStepPath(_baseUndock)) _flyPathPartControl++;
+                    break;
+                case 1:
+                    if (flyStepPath(steps)) _flyPathPartControl++;
+                    break;
+                case 2:
+                    if (flyStepPath(_baseDock)) _flyPathPartControl++;
+                    break;
+                case 3:
+                    Echo("Fly path finished");
+                    return true;
+                default:
+                    Echo("Problem with FlightPathPartControl number");
+                    return false;
+            }
+            return false;
+        }
+
         public bool flyStepPath(List<PathStep> steps)
         {
             if (_stepControl == steps.Count)
             {
-                foreach (var gyro in _gyros)
-                {
-                    gyro.GyroOverride = false;
-                }
-                foreach (var thruster in _thrusters)
-                {
-                    thruster.ThrustOverridePercentage = 0f;
-                }
+                resetOverrides();
                 _stepControl++; ;
                 return false;
             }
             else if (_stepControl == steps.Count + 1)
             {
-                Echo("Flight path finished");
+                Echo("Step path finished");
+                _stepControl = 0;
                 return true;
             }
             else if (makeStep(steps[_stepControl]))
@@ -266,7 +366,7 @@ namespace IngameScript
                     if (move(distanceVec, getTargetMineSpeed(distanceVec), _controller, _thrusters, mass)) _mineControl++;
                     break;
                 case 2:
-                    if (move(returnVec, getTargetMineReturnSpeed(distanceVec), _controller, _thrusters, mass)) _mineControl++;
+                    if (move(returnVec, getTargetMineReturnSpeed(returnVec), _controller, _thrusters, mass)) _mineControl++;
                     break;
                 case 3:
                     drillOff();
