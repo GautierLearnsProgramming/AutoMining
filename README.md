@@ -51,10 +51,10 @@ The custom data are divided into several sections, and you need to configure all
 
 First, let's start with the different kind of instructions we can give the ship.
 We can tell it to :
-*move
-*mine
-*park
-*unpark
+* move
+* mine
+* park
+* unpark
 
 The move instruction simply tells the ship to move, in a straight line, from its current position to the given position (these long series of numbers represent a ship orientation and GPS position). A ship executing a move command will orient itself, then move, and on arrival will reorient itself in case there was a small orientation change during the trip.
 
