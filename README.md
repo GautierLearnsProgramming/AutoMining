@@ -11,13 +11,21 @@ The project is written in C#, and involved some degree of 3D Vectorial Geometry 
 
 It is developed with the Visual Studio IDE, because of the fantastic SDK for Space Engineers developed by Malware on this IDE (see : https://github.com/malware-dev/MDK-SE).
 
+<h2>Thanks</h2>
+
+I would like to give many thanks to user https://github.com/malware-dev for their amazing SDK and their help on the Space Engineers discord server, and to user https://github.com/Whiplash141 for their help with the physics of the game and for their gyroscope and thruster code which I use a customized version of. Without them, making this script would have been much more daunting.
+
 <h2> How to use </h2>
 
 In order to use the script, you should copy-paste the code in GyrosManipulation/CompiledScript.cs and GyrosManipulation/CompiledInformationScript.cs to two different Programmable Blocks (PB) in your game.
 
 In order to make the main script (CompliedScript.cs) work properly, you need to add your routes and configuration to the custom data of your PB.
 
-Example custom data :
+<h3> Custom data </h3>
+
+The custom data are divided into several sections, and you need to configure all of them properly for the script to work well. Don't worry about all the big numbers, you won't have to write them down manually, the information script (CompiledInformationScript.cs) is there for that purpose.
+
+<h4> Example Custom Data </h4>
 ```
 [apath]
 move2=0.548803806304932,0.763822972774506,0.339689284563065,0,-0.565989792346954,0.638557612895966,-0.521440029144287,0,-0.615199089050293,0.0939075797796249,0.782758891582489,0,908540.505190483,-10000.794676584,1590405.63323244,1
@@ -37,7 +45,7 @@ bbbpath=bpath
 aaapath=apath
 ```
 
-The custom data are divided into several sections, and you need to configure all of them properly for the script to work well. Don't worry about all the big numbers, you won't have to write them down manually, the information script (CompiledInformationScript.cs) is there for that purpose.
+<h4> Instructions </h4>
 
 First, let's start with the different kind of instructions we can give the ship.
 We can tell it to :
@@ -54,6 +62,8 @@ The unpark instruction tells the ship to unpark then move to the given position.
 
 The park instruction tells the ship to move the given position, and park as soon as it is in parking range.
 
+<h4> Sections </h4>
+
 Now, let's deal with the different section of the custom data, indicated by the [] symbols.
 
 [baseDock] and [baseUndock] :
@@ -67,8 +77,24 @@ Paths sections can containing as many of the four different instructions as you 
 [flightPlan]:
 Here, you define the flight plan for your ship, so the ship will execute the corresponding paths, in order. This means that you can have more paths stored in memory than you will actually execute. The ship will stay docked for 15 in game seconds between each path in order to unload the cargo it may have acquired.
 
+<h4> Recap </h4>
+
 So, to recap, a typical ship trip will look like that :
 l. undock from your base using the instructions in [baseUndock]
 l. execute the instructions in the required path
 l. dock to your base using the instructions in [baseDock]
 
+<h3> Execution </h3>
+
+Once you have written all your custom to your PB, you can use the script ! 
+All you have to do is to run the PB with __start__ as argument, and the script will execute itself.
+If you have a problem and need to stop the script, just run the PB with __forceStop__ as argument, and the script will stop and remove all command overrides.
+
+(https://user-images.githubusercontent.com/22789441/129974314-d152c875-0c6c-42b7-8ae8-ef06407ec8b7.png)
+
+<h3> The Information Script </h3>
+
+In order to help you get all the numbers (GPS position/ orientatio![runPBstartSE]
+n) needed to make the script work, I have created an information script. Copy-paste it into a PB, and run it with the following arguments :
+* AddMoveStep will write your current GPS positon/orientation to the custom data of the PB which has the information script.
+* AddMineStep will do the same, but add a semi-colon and clearly mark the spot where you have to enter the desired mine depth at the end of the line.
