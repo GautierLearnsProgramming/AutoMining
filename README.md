@@ -43,8 +43,8 @@ The custom data are divided into several sections, and you need to configure all
     [baseUndock]
     unpark1=0.0241432785987854,-0.565241098403931,-0.824572324752808,0,-0.511520862579346,0.701679646968842,-0.495975822210312,0,0.858931541442871,0.433760434389114,-0.272191762924194,0,908426.727521708,-9987.96794049886,1590536.60462555,1
     [flightPlan]
-    bbbpath=bpath
-    aaapath=apath
+    bpath=bpath
+    apath=apath
 
 
 <h4> Instructions </h4>
