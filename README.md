@@ -28,7 +28,7 @@ In order to make the main script (CompliedScript.cs) work properly, you need to 
 The custom data are divided into several sections, and you need to configure all of them properly for the script to work well. Don't worry about all the big numbers, you won't have to write them down manually, the information script (CompiledInformationScript.cs) is there for that purpose.
 
 <h4> Example Custom Data </h4>
-```
+```javascript
 [apath]
 move2=0.548803806304932,0.763822972774506,0.339689284563065,0,-0.565989792346954,0.638557612895966,-0.521440029144287,0,-0.615199089050293,0.0939075797796249,0.782758891582489,0,908540.505190483,-10000.794676584,1590405.63323244,1
 mine0=-0.46838903427124,0.238387107849121,0.850754261016846,0,-0.661519765853882,0.543667078018188,-0.516543865203857,0,-0.585664391517639,-0.804734468460083,-0.0969498157501221,0,908592.412679186,-9939.39042097775,1590398.96980547,1;50
