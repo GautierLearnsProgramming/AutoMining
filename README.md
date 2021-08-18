@@ -15,6 +15,8 @@ It is developed with the Visual Studio IDE, because of the fantastic SDK for Spa
 
 I would like to give many thanks to user https://github.com/malware-dev for their amazing SDK and their help on the Space Engineers discord server, and to user https://github.com/Whiplash141 for their help with the physics of the game and for their gyroscope and thruster code which I use a customized version of. Without them, making this script would have been much more daunting.
 
+I would also like to give a small thank to user Digi from the SE discord who suggested the name !
+
 <h2> How to use </h2>
 
 In order to use the script, you should copy-paste the code in GyrosManipulation/CompiledScript.cs and GyrosManipulation/CompiledInformationScript.cs to two different Programmable Blocks (PB) in your game.
