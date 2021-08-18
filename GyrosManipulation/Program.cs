@@ -68,13 +68,23 @@ namespace IngameScript
                     resetOverrides();
                     Runtime.UpdateFrequency = UpdateFrequency.None;
                 }
+                else if (argument.Equals("debug"))
+                {
+                    foreach(var path in _flightPlan)
+                    {
+                        Echo(path);
+                        Echo(_paths[path][0].coord.ToString());
+                    }
+                }
             } else
             {
                 if (_sleepControl > 0)
                 {
                     _sleepControl--;
                 }
-                else { 
+                else {
+                    Echo(_flightPlan.Count.ToString());
+                    Echo(_paths.Keys.Count.ToString());
                    flyFlightPlan();
                 }
             }
@@ -129,7 +139,7 @@ namespace IngameScript
             foreach(var section in sections)
             {
                 if (!section.Contains("path")) continue;
-
+                Echo(section);
                 List<MyIniKey> pathKeys = new List<MyIniKey>();
                 List<PathStep> _steps = new List<PathStep>();
                 _ini.GetKeys(section, pathKeys);
@@ -193,7 +203,12 @@ namespace IngameScript
             }
             else
             {
-                if (flyTotalPath(_paths[_flightPlan[_flightPlanControl]])) _flightPlanControl++;
+                List<PathStep> steps;
+                Echo(_flightPlan[_flightPlanControl]);
+                _paths.TryGetValue(_flightPlan[_flightPlanControl], out steps);
+                if (flyTotalPath(steps)) {
+                    Sleep(1000);
+                    _flightPlanControl++; }
             }
             return false;
         }
@@ -225,6 +240,7 @@ namespace IngameScript
                     break;
                 case 3:
                     Echo("Fly path finished");
+                    _flyPathPartControl = 0;
                     return true;
                 default:
                     Echo("Problem with FlightPathPartControl number");
@@ -473,11 +489,7 @@ namespace IngameScript
 
         public double getTargetSpeed(Vector3D distanceVec, List<IMyThrust> thrusters, double mass)
         {
-            double distance = distanceVec.Length();
-            if (distance < 50)
-            {
-                return Math.Log(distance + 1);
-            }
+            
 
             double maxBackwardThrust = 0;
             double maxBackwardAcceleration;
@@ -487,7 +499,13 @@ namespace IngameScript
                 maxBackwardThrust += Math.Max(0, thruster.MaxEffectiveThrust * Vector3D.Dot(thruster.WorldMatrix.Backward, moveDirection));
             }
             maxBackwardAcceleration = maxBackwardThrust / mass;
-            
+
+            double distance = distanceVec.Length();
+            if (distance < 50)
+            {
+                return Math.Log(distance + 1) * Math.Sqrt(maxBackwardAcceleration) * 0.5;
+            }
+
             return MathHelper.Clamp(Math.Sqrt(2 * maxBackwardAcceleration * distance) * 0.6, 0, 100);
         }
 
