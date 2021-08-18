@@ -21,7 +21,7 @@ I would also like to give a small thank to user Digi from the SE discord who sug
 
 In order to use the script, you should copy-paste the code in GyrosManipulation/CompiledScript.cs and GyrosManipulation/CompiledInformationScript.cs to two different Programmable Blocks (PB) in your game.
 
-In order to make the main script (CompliedScript.cs) work properly, you need to add your routes and configuration to the custom data of your PB.
+In order to make the main script (CompliedScript.cs) work properly, you need to add your fly paths and configuration to the custom data of your PB.
 
 <h3> Custom data </h3>
 
