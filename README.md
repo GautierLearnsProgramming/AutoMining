@@ -74,7 +74,7 @@ These sections contains instruction that the ship will execute at each start of 
 
 [pathsomecharacters] :
 You can add as many sections containing path in their name as you want, the script will interpret of all these as being paths to be executed if asked.
-Paths sections can containing as many of the four different instructions as you want, the ship will execute them all in order. Note that the name of each instruction has to be different, so if you want your path to contain three different move commands, you will have to name them, for example, move0, move1, move2.
+Paths sections can contain as many of the four different instructions as you want, the ship will execute them all in order. Note that the name of each instruction has to be different, so if you want your path to contain three different move commands, you will have to name them, for example, move0, move1, move2.
 
 [flightPlan]:
 Here, you define the flight plan for your ship, so the ship will execute the corresponding paths, in order. This means that you can have more paths stored in memory than you will actually execute. The ship will stay docked for 15 in game seconds between each path in order to unload the cargo it may have acquired.
