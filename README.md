@@ -93,7 +93,7 @@ Once you have written all your custom data to your PB, you can use the script !
 All you have to do is to run the PB with __start__ as argument, and the script will execute itself.
 If you have a problem and need to stop the script, just run the PB with __forceStop__ as argument, and the script will stop and remove all command overrides.
 
-(https://user-images.githubusercontent.com/22789441/129974314-d152c875-0c6c-42b7-8ae8-ef06407ec8b7.png)
+![Run demo](https://user-images.githubusercontent.com/22789441/129974314-d152c875-0c6c-42b7-8ae8-ef06407ec8b7.png)
 
 <h3> The Information Script </h3>
 
