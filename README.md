@@ -89,7 +89,7 @@ So, to recap, a typical ship trip will look like that :
 
 <h3> Execution </h3>
 
-Once you have written all your custom to your PB, you can use the script ! 
+Once you have written all your custom data to your PB, you can use the script ! 
 All you have to do is to run the PB with __start__ as argument, and the script will execute itself.
 If you have a problem and need to stop the script, just run the PB with __forceStop__ as argument, and the script will stop and remove all command overrides.
 
