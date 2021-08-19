@@ -70,7 +70,7 @@ Now, let's deal with the different section of the custom data, indicated by the 
 
 [baseDock] and [baseUndock] :
 
-These sections contains instruction that the ship will execute at each start of trip (baseUndock) and each end of path (baseDock). Their purpose is to avoid copy-pasting the same instructions over and over for the docking and undocking that will necessarily happen at the beginning and at the end of each trip. 
+These sections contains instruction that the ship will execute at each start of path (baseUndock) and each end of path (baseDock). Their purpose is to avoid copy-pasting the same instructions over and over for the docking and undocking that will necessarily happen at the beginning and at the end of each trip. 
 
 [pathsomecharacters] :
 You can add as many sections containing path in their name as you want, the script will interpret of all these as being paths to be executed if asked.
