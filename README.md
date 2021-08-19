@@ -25,7 +25,7 @@ In order to make the main script (CompliedScript.cs) work properly, you need to 
 
 <h3> Custom data </h3>
 
-The custom data are divided into several sections, and you need to configure all of them properly for the script to work well. Don't worry about all the big numbers, you won't have to write them down manually, the information script (CompiledInformationScript.cs) is there for that purpose.
+The custom data are divided into several sections, and you need to configure all of them properly for the script to work well. Don't worry about all the big numbers, you won't have to write them down manually, [the information script](https://github.com/GautierLearnsProgramming/TheBoringDrone#-the-information-script-) (CompiledInformationScript.cs) is there for that purpose.
 
 <h4> Example Custom Data </h4>
 
