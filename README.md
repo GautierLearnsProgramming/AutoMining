@@ -2,7 +2,7 @@
 
 <h2>Description</h2>
 
-The Boring Drone is a C# project that I wrote for the game Space Engineers, mainly for use on by the Fortuna Ultralis Corporation.
+The Boring Drone is a C# project that I wrote for the game Space Engineers, mainly for use on Stone Industries by the Fortuna Ultralis Corporation.
 It is designed to register mining routes and automatically execute them, allowing you to automate the mining for your base.
 
 <h2> Technical description</h2>
