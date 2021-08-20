@@ -11,7 +11,6 @@ List<IMyThrust> _thrusters = new List<IMyThrust>();
 List<IMyShipDrill> _drills = new List<IMyShipDrill>();
 List<IMyShipController> _controllers = new List<IMyShipController>();
 List<IMyShipConnector> _connectors = new List<IMyShipConnector>();
-List<PathStep> _steps = new List<PathStep>();
 List<PathStep> _baseDock = new List<PathStep>();
 List<PathStep> _baseUndock = new List<PathStep>();
 List<string> _flightPlan = new List<string>();
@@ -54,22 +53,24 @@ public void Main(string argument, UpdateType updateSource)
         }
         else if (argument.Equals("debug"))
         {
-            foreach(var path in _flightPlan)
+            foreach (var path in _flightPlan)
             {
                 Echo(path);
                 Echo(_paths[path][0].coord.ToString());
             }
         }
-    } else
+    }
+    else
     {
         if (_sleepControl > 0)
         {
             _sleepControl--;
         }
-        else {
+        else
+        {
             Echo(_flightPlan.Count.ToString());
             Echo(_paths.Keys.Count.ToString());
-           flyFlightPlan();
+            flyFlightPlan();
         }
     }
 }
@@ -99,7 +100,7 @@ public void loadFligthPlan()
     List<MyIniKey> flightPlanKeys = new List<MyIniKey>();
     _ini.GetKeys("flightPlan", flightPlanKeys);
 
-    foreach(var key in flightPlanKeys)
+    foreach (var key in flightPlanKeys)
     {
         _flightPlan.Add(key.Name);
     }
@@ -120,7 +121,7 @@ public void loadPaths()
     List<string> sections = new List<string>();
     _ini.GetSections(sections);
 
-    foreach(var section in sections)
+    foreach (var section in sections)
     {
         if (!section.Contains("path")) continue;
         Echo(section);
@@ -141,23 +142,23 @@ public void loadSteps(List<MyIniKey> pathKeys, List<PathStep> _steps)
         if (key.Name.Contains("move"))
         {
             var coordString = _ini.Get(key).ToString();
-            _steps.Add(new PathStep(parseCoord(coordString), PathStepType.Move));
+            _steps.Add(new PathStep(key.Name, parseCoord(coordString), PathStepType.Move));
         }
         else if (key.Name.Contains("mine"))
         {
             var mineStepString = _ini.Get(key).ToString();
             var values = mineStepString.Split(';');
-            _steps.Add(new PathStep(parseCoord(values[0]), PathStepType.Mine, Double.Parse(values[1])));
+            _steps.Add(new PathStep(key.Name, parseCoord(values[0]), PathStepType.Mine, Double.Parse(values[1])));
         }
         else if (key.Name.Contains("unpark"))
         {
             var coordString = _ini.Get(key).ToString();
-            _steps.Add(new PathStep(parseCoord(coordString), PathStepType.Unpark));
+            _steps.Add(new PathStep(key.Name, parseCoord(coordString), PathStepType.Unpark));
         }
         else if (key.Name.Contains("park"))
         {
             var coordString = _ini.Get(key).ToString();
-            _steps.Add(new PathStep(parseCoord(coordString), PathStepType.Park));
+            _steps.Add(new PathStep(key.Name, parseCoord(coordString), PathStepType.Park));
         }
     }
 }
@@ -190,9 +191,11 @@ public bool flyFlightPlan()
         List<PathStep> steps;
         Echo(_flightPlan[_flightPlanControl]);
         _paths.TryGetValue(_flightPlan[_flightPlanControl], out steps);
-        if (flyTotalPath(steps)) {
+        if (flyTotalPath(steps))
+        {
             Sleep(1000);
-            _flightPlanControl++; }
+            _flightPlanControl++;
+        }
     }
     return false;
 }
@@ -256,11 +259,12 @@ public bool flyStepPath(List<PathStep> steps)
 
 public bool makeStep(PathStep step)
 {
+    Echo($"Executing step {step.name}");
     switch (step.stepType)
     {
         case PathStepType.Move:
             {
-                    return flyToCoordinate(step.coord);
+                return flyToCoordinate(step.coord);
             }
         case PathStepType.Mine:
             {
@@ -299,7 +303,7 @@ public bool makeParkStep(PathStep step)
         case 1:
             bool parked = false;
             Echo("Trying to connect");
-            foreach(var connector in _connectors)
+            foreach (var connector in _connectors)
             {
                 if (connector.Status == MyShipConnectorStatus.Connectable)
                 {
@@ -392,7 +396,7 @@ public double getTargetMineReturnSpeed(Vector3D distanceVec)
 
 public bool drillOn()
 {
-    foreach(var drill in _drills)
+    foreach (var drill in _drills)
     {
         drill.Enabled = true;
     }
@@ -428,10 +432,10 @@ public bool flyToCoordinate(MatrixD coordinate, bool orientFirst)
                 break;
             }
         case 1:
-            if(move(distanceVec, targetSpeed, _controller, _thrusters, mass)) _flightControl++;
+            if (move(distanceVec, targetSpeed, _controller, _thrusters, mass)) _flightControl++;
             break;
         case 2:
-            if(orientShip(coordinate.Forward, coordinate.Up, _controller)) _flightControl++;
+            if (orientShip(coordinate.Forward, coordinate.Up, _controller)) _flightControl++;
             break;
         case 3:
             if (move(distanceVec, targetSpeed, _controller, _thrusters, mass)) _flightControl++;
@@ -455,7 +459,7 @@ public bool move(Vector3D distanceVec, double targetSpeed, IMyShipController _co
 {
     if (distanceVec.Length() < 0.03)
     {
-        foreach(var thruster in _thrusters)
+        foreach (var thruster in _thrusters)
         {
             thruster.ThrustOverride = 0f;
         }
@@ -478,7 +482,7 @@ public double getTargetSpeed(Vector3D distanceVec, List<IMyThrust> thrusters, do
     double maxBackwardThrust = 0;
     double maxBackwardAcceleration;
     Vector3D moveDirection = SafeNormalize(distanceVec);
-    foreach(var thruster in thrusters)
+    foreach (var thruster in thrusters)
     {
         maxBackwardThrust += Math.Max(0, thruster.MaxEffectiveThrust * Vector3D.Dot(thruster.WorldMatrix.Backward, moveDirection));
     }
@@ -487,10 +491,10 @@ public double getTargetSpeed(Vector3D distanceVec, List<IMyThrust> thrusters, do
     double distance = distanceVec.Length();
     if (distance < 50)
     {
-        return Math.Log(distance + 1) * Math.Sqrt(maxBackwardAcceleration) * 0.5;
+        return Math.Log(distance + 1) * Math.Sqrt(maxBackwardAcceleration) * 0.8;
     }
 
-    return MathHelper.Clamp(Math.Sqrt(2 * maxBackwardAcceleration * distance) * 0.6, 0, 100);
+    return MathHelper.Clamp(Math.Sqrt(2 * maxBackwardAcceleration * distance) * 0.6, 0, 250);
 }
 
 public void ApplyThrustCustom(List<IMyThrust> thrusters, Vector3D travelVec, IMyShipController thisController, double mass)
@@ -651,21 +655,24 @@ public bool IsClosed(IMyTerminalBlock b)
 
 public class PathStep
 {
-    public PathStep(MatrixD coord, PathStepType pathStepType)
+    public PathStep(string name, MatrixD coord, PathStepType pathStepType)
     {
         this.stepType = pathStepType;
         this.coord = coord;
+        this.name = name;
     }
 
-    public PathStep(MatrixD coord, PathStepType pathStepType, double depth)
+    public PathStep(string name, MatrixD coord, PathStepType pathStepType, double depth)
     {
         this.stepType = pathStepType;
         this.coord = coord;
         this.mineDepth = depth;
+        this.name = name;
     }
-    public PathStepType stepType {get; set;}
+    public PathStepType stepType { get; set; }
     public MatrixD coord { get; set; }
     public double mineDepth { get; set; }
+    public string name { get; set; }
 }
 
 public enum PathStepType
