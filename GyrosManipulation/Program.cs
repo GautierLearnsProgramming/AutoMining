@@ -506,7 +506,7 @@ namespace IngameScript
                 return Math.Log(distance + 1) * Math.Sqrt(maxBackwardAcceleration) * 0.8;
             }
 
-            return MathHelper.Clamp(Math.Sqrt(2 * maxBackwardAcceleration * distance) * 0.6, 0, 100);
+            return MathHelper.Clamp(Math.Sqrt(2 * maxBackwardAcceleration * distance) * 0.6, 0, 250);
         }
 
         public void ApplyThrustCustom(List<IMyThrust> thrusters, Vector3D travelVec, IMyShipController thisController, double mass)
