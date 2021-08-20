@@ -27,7 +27,6 @@ namespace IngameScript
         List<IMyShipDrill> _drills = new List<IMyShipDrill>();
         List<IMyShipController> _controllers = new List<IMyShipController>();
         List<IMyShipConnector> _connectors = new List<IMyShipConnector>();
-        List<PathStep> _steps = new List<PathStep>();
         List<PathStep> _baseDock = new List<PathStep>();
         List<PathStep> _baseUndock = new List<PathStep>();
         List<string> _flightPlan = new List<string>();
@@ -157,23 +156,23 @@ namespace IngameScript
                 if (key.Name.Contains("move"))
                 {
                     var coordString = _ini.Get(key).ToString();
-                    _steps.Add(new PathStep(parseCoord(coordString), PathStepType.Move));
+                    _steps.Add(new PathStep(key.Name, parseCoord(coordString), PathStepType.Move));
                 }
                 else if (key.Name.Contains("mine"))
                 {
                     var mineStepString = _ini.Get(key).ToString();
                     var values = mineStepString.Split(';');
-                    _steps.Add(new PathStep(parseCoord(values[0]), PathStepType.Mine, Double.Parse(values[1])));
+                    _steps.Add(new PathStep(key.Name, parseCoord(values[0]), PathStepType.Mine, Double.Parse(values[1])));
                 }
                 else if (key.Name.Contains("unpark"))
                 {
                     var coordString = _ini.Get(key).ToString();
-                    _steps.Add(new PathStep(parseCoord(coordString), PathStepType.Unpark));
+                    _steps.Add(new PathStep(key.Name, parseCoord(coordString), PathStepType.Unpark));
                 }
                 else if (key.Name.Contains("park"))
                 {
                     var coordString = _ini.Get(key).ToString();
-                    _steps.Add(new PathStep(parseCoord(coordString), PathStepType.Park));
+                    _steps.Add(new PathStep(key.Name, parseCoord(coordString), PathStepType.Park));
                 }
             }
         }
@@ -272,6 +271,7 @@ namespace IngameScript
 
         public bool makeStep(PathStep step)
         {
+            Echo($"Executing step {step.name}");
             switch (step.stepType)
             {
                 case PathStepType.Move:
@@ -667,21 +667,24 @@ namespace IngameScript
 
         public class PathStep
         {
-            public PathStep(MatrixD coord, PathStepType pathStepType)
+            public PathStep(string name, MatrixD coord, PathStepType pathStepType)
             {
                 this.stepType = pathStepType;
                 this.coord = coord;
+                this.name = name;
             }
 
-            public PathStep(MatrixD coord, PathStepType pathStepType, double depth)
+            public PathStep(string name, MatrixD coord, PathStepType pathStepType, double depth)
             {
                 this.stepType = pathStepType;
                 this.coord = coord;
                 this.mineDepth = depth;
+                this.name = name;
             }
             public PathStepType stepType {get; set;}
             public MatrixD coord { get; set; }
             public double mineDepth { get; set; }
+            public string name { get; set; }
         }
 
         public enum PathStepType
