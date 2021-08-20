@@ -144,10 +144,40 @@ public void loadSteps(List<MyIniKey> pathKeys, List<PathStep> _steps)
             var coordString = _ini.Get(key).ToString();
             _steps.Add(new PathStep(key.Name, parseCoord(coordString), PathStepType.Move));
         }
+        else if (key.Name.Contains("mineB"))
+        {
+            var mineStepString = _ini.Get(key).ToString();
+            var values = mineStepString.Split(';');
+            switch (values.Count())
+            {
+                case 2:
+                    _steps.Add(new PathStep(key.Name, parseCoord(values[0]), PathStepType.Mine, parseCoord(values[0])));
+                    break;
+                case 3:
+                    _steps.Add(new PathStep(key.Name, parseCoord(values[0]), PathStepType.Mine, parseCoord(values[0]), Boolean.Parse(values[2])));
+                    break;
+                default:
+                    Echo($"Incorrect mine argument count at step {key.Name}, check your custom data");
+                    break;
+            }
+            _steps.Add(new PathStep(key.Name, parseCoord(values[0]), PathStepType.Mine, Double.Parse(values[1])));
+        }
         else if (key.Name.Contains("mine"))
         {
             var mineStepString = _ini.Get(key).ToString();
             var values = mineStepString.Split(';');
+            switch (values.Count())
+            {
+                case 2:
+                    _steps.Add(new PathStep(key.Name, parseCoord(values[0]), PathStepType.Mine, Double.Parse(values[1])));
+                    break;
+                case 3:
+                    _steps.Add(new PathStep(key.Name, parseCoord(values[0]), PathStepType.Mine, Double.Parse(values[1]), Boolean.Parse(values[2])));
+                    break;
+                default:
+                    Echo($"Incorrect mine argument count at step {key.Name}, check your custom data");
+                    break;
+            }
             _steps.Add(new PathStep(key.Name, parseCoord(values[0]), PathStepType.Mine, Double.Parse(values[1])));
         }
         else if (key.Name.Contains("unpark"))
@@ -238,6 +268,7 @@ public bool flyTotalPath(List<PathStep> steps)
 
 public bool flyStepPath(List<PathStep> steps)
 {
+    Echo($"Progress: Step {_stepControl}/{steps.Count}");
     if (_stepControl == steps.Count)
     {
         resetOverrides();
@@ -268,7 +299,11 @@ public bool makeStep(PathStep step)
             }
         case PathStepType.Mine:
             {
-                return mineTunnel(step.coord, step.mineDepth);
+                return mineTunnel(step.coord, step.mineDepth, step.moveBack);
+            }
+        case PathStepType.MineB:
+            {
+                return mineTunnel(step.coord, step.endCoord, step.moveBack);
             }
         case PathStepType.Unpark:
             {
@@ -278,10 +313,19 @@ public bool makeStep(PathStep step)
             {
                 return makeParkStep(step);
             }
+        case PathStepType.Unload:
+            {
+                return unload(step.shipContainerName, step.baseContainerName);
+            }
         default:
             Echo("Problem with step type");
             return false;
     }
+}
+
+public bool unload(string shipContainerName, string baseContainerName)
+{
+    return false;
 }
 
 public bool makeParkStep(PathStep step)
@@ -351,7 +395,7 @@ public double getTargetMiningSpeed(Vector3D distanceVec)
     return MathHelper.Clamp(Math.Log(distanceVec.Length() + 1), 0, 0.8);
 }
 
-public bool mineTunnel(MatrixD startingPosition, double depth)
+public bool mineTunnel(MatrixD startingPosition, double depth, bool moveBack)
 {
     var destination = startingPosition.Translation + depth * SafeNormalize(startingPosition.Forward);
     var distanceVec = destination - _controller.GetPosition();
@@ -370,9 +414,58 @@ public bool mineTunnel(MatrixD startingPosition, double depth)
             if (move(distanceVec, getTargetMineSpeed(distanceVec), _controller, _thrusters, mass)) _mineControl++;
             break;
         case 2:
-            if (move(returnVec, getTargetMineReturnSpeed(returnVec), _controller, _thrusters, mass)) _mineControl++;
+            if (moveBack)
+            {
+                if (move(returnVec, getTargetMineReturnSpeed(returnVec), _controller, _thrusters, mass)) _mineControl++;
+            }
+            else
+            {
+                _mineControl++;
+            }
             break;
         case 3:
+            drillOff();
+            _mineControl = 0;
+            Echo("Finished mining !");
+            return true;
+        default:
+            Echo("There is a problem with the mine control number !");
+            break;
+    }
+    return false;
+}
+
+public bool mineTunnel(MatrixD startingPosition, MatrixD endPosition, bool moveback)
+{
+    var mass = _controller.CalculateShipMass().PhysicalMass;
+    switch (_mineControl)
+    {
+        case 0:
+            if (flyToCoordinate(startingPosition))
+            {
+                drillOn();
+                _mineControl++;
+            }
+            break;
+        case 1:
+            if (orientShip(endPosition.Translation - startingPosition.Translation, endPosition.Up, _controller)) _mineControl++;
+            break;
+        case 2:
+            var distanceVec = endPosition.Translation - _controller.WorldMatrix.Translation;
+            if (move(distanceVec, getTargetMineSpeed(distanceVec), _controller, _thrusters, mass)) _mineControl++;
+            break;
+        case 3:
+            if (moveback)
+            {
+                var returnVec = startingPosition.Translation - _controller.WorldMatrix.Translation;
+                if (move(returnVec, getTargetMineReturnSpeed(returnVec), _controller, _thrusters, mass)) _mineControl++;
+            }
+            else
+            {
+                _mineControl++;
+            }
+            break;
+        case 4:
             drillOff();
             _mineControl = 0;
             Echo("Finished mining !");
@@ -417,7 +510,7 @@ public bool flyToCoordinate(MatrixD coordinate, bool orientFirst)
     Vector3D distanceVec = coordinate.Translation - _controller.GetPosition();
     double mass = _controller.CalculateShipMass().PhysicalMass;
     var targetSpeed = getTargetSpeed(distanceVec, _thrusters, mass);
-    Echo(targetSpeed.ToString());
+    Echo($"Target speed :{targetSpeed.ToString()}m/s");
     switch (_flightControl)
     {
         case 0:
@@ -457,6 +550,15 @@ public bool flyToCoordinate(MatrixD coordinate)
 }
 public bool move(Vector3D distanceVec, double targetSpeed, IMyShipController _controller, List<IMyThrust> _thrusters, double mass)
 {
+    var distance = distanceVec.Length();
+    if (distance > 20)
+    {
+        Runtime.UpdateFrequency = UpdateFrequency.Update10;
+    }
+    else
+    {
+        Runtime.UpdateFrequency = UpdateFrequency.Update1;
+    }
     if (distanceVec.Length() < 0.03)
     {
         foreach (var thruster in _thrusters)
@@ -509,11 +611,7 @@ public void ApplyThrustCustom(List<IMyThrust> thrusters, Vector3D travelVec, IMy
         if (Vector3D.Dot(thisThrust.WorldMatrix.Forward, thrustToApply) > 0)
         {
             var neededThrust = Vector3D.Dot(thrustToApply, thisThrust.WorldMatrix.Forward);
-            Echo("Needed thrust");
-            Echo(neededThrust.ToString());
             var outputProportion = MathHelper.Clamp(neededThrust / thisThrust.MaxEffectiveThrust, 0, 1);
-            Echo("Output Proportion");
-            Echo((Convert.ToSingle(outputProportion).ToString()));
             thisThrust.ThrustOverridePercentage = (float)outputProportion;
             thrustToApply -= thisThrust.WorldMatrix.Forward * outputProportion * thisThrust.MaxEffectiveThrust;
         }
@@ -668,17 +766,58 @@ public class PathStep
         this.coord = coord;
         this.mineDepth = depth;
         this.name = name;
+        this.moveBack = true;
+    }
+
+    public PathStep(string name, MatrixD coord, PathStepType pathStepType, double depth, bool moveBack)
+    {
+        this.stepType = pathStepType;
+        this.coord = coord;
+        this.mineDepth = depth;
+        this.name = name;
+        this.moveBack = moveBack;
+    }
+
+    public PathStep(string name, MatrixD coord, PathStepType pathStepType, MatrixD endCoord)
+    {
+        this.stepType = pathStepType;
+        this.coord = coord;
+        this.endCoord = endCoord;
+        this.name = name;
+        this.moveBack = true;
+    }
+
+    public PathStep(string name, MatrixD coord, PathStepType pathStepType, MatrixD endCoord, bool moveBack)
+    {
+        this.stepType = pathStepType;
+        this.coord = coord;
+        this.endCoord = endCoord;
+        this.name = name;
+        this.moveBack = moveBack;
+    }
+
+    public PathStep(string name, string shipContainerName, PathStepType pathStepType, string baseContainerName)
+    {
+        this.stepType = pathStepType;
+        this.shipContainerName = shipContainerName;
+        this.baseContainerName = baseContainerName;
     }
     public PathStepType stepType { get; set; }
     public MatrixD coord { get; set; }
+    public MatrixD endCoord { get; set; }
     public double mineDepth { get; set; }
     public string name { get; set; }
+    public bool moveBack { get; set; }
+    public string shipContainerName { get; set; }
+    public string baseContainerName { get; set; }
 }
 
 public enum PathStepType
 {
     Move,
     Mine,
+    MineB,
     Park,
-    Unpark
+    Unpark,
+    Unload
 }
